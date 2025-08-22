@@ -20,8 +20,16 @@ type PsqlDB struct {
 }
 
 type Config struct {
-	App    App    `json:"app"`
-	PsqlDB PsqlDB `json:"psql_db"`
+	App      App      `json:"app"`
+	PsqlDB   PsqlDB   `json:"psql_db"`
+	RabbitMQ RabbitMQ `json:"rabbitmq"`
+}
+
+type RabbitMQ struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
 }
 
 func NewConfig() *Config {
@@ -40,6 +48,12 @@ func NewConfig() *Config {
 			DbName:    viper.GetString("DATABASE_NAME"),
 			DBMaxOpen: viper.GetInt("DATABASE_MAX_OPEN_CONNECTIONS"),
 			DBMaxIdle: viper.GetInt("DATABASE_MAX_IDLE_CONNECTIONS"),
+		},
+		RabbitMQ: RabbitMQ{
+			Host:     viper.GetString("RABBITMQ_HOST"),
+			Port:     viper.GetString("RABBITMQ_PORT"),
+			User:     viper.GetString("RABBITMQ_USER"),
+			Password: viper.GetString("RABBITMQ_PASSWORD"),
 		},
 	}
 }

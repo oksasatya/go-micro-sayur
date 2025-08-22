@@ -1,2 +1,2 @@
-@host = localhost:8080/api
+@host = user-service.oksasatya.dev/api
 GET http://{{host}}/check
