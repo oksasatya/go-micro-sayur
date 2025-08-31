@@ -1,9 +1,6 @@
 package handler
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
 	"net/http"
 	"user-service/config"
 	"user-service/internal/adapter"
@@ -11,11 +8,16 @@ import (
 	"user-service/internal/adapter/handler/response"
 	"user-service/internal/core/domain/entity"
 	"user-service/internal/core/service"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 )
 
 type UserHandlerInterface interface {
 	SignIn(ctx echo.Context) error
 	CreateUserAccount(ctx echo.Context) error
+	ForgotPassword(ctx echo.Context) error
 }
 
 type UserHandler struct {
@@ -31,6 +33,7 @@ func NewUserHandler(e *echo.Echo, userService service.UserServiceInterface, cfg 
 	e.Use(middleware.Recover())
 	e.POST("/signIn", userHandler.SignIn)
 	e.POST("/signUp", userHandler.CreateUserAccount)
+	e.POST("/forgot-password", userHandler.ForgotPassword)
 
 	// Middleware for checking token
 	mid := adapter.NewMiddlewareAdapter(cfg)
@@ -136,4 +139,48 @@ func (h *UserHandler) CreateUserAccount(c echo.Context) error {
 	resp.Message = "success"
 	resp.Data = nil
 	return c.JSON(http.StatusCreated, resp)
+}
+
+func (h *UserHandler) ForgotPassword(ctx echo.Context) error {
+	// Implement the ForgotPassword logic here
+	var (
+		req  = request.ForgotPasswordRequest{}
+		resp = response.DefaultResponse{}
+		c    = ctx.Request().Context()
+	)
+
+	if err = ctx.Bind(&req); err != nil {
+		log.Errorf("[UserHandler-1] ForgotPassword: failed to bind request: %v", err)
+		resp.Message = err.Error()
+		resp.Data = nil
+		return ctx.JSON(http.StatusUnprocessableEntity, resp)
+	}
+
+	if err = ctx.Validate(req); err != nil {
+		log.Errorf("[UserHandler-1] ForgotPassword: request validation failed: %v", err)
+		resp.Message = err.Error()
+		resp.Data = nil
+		return ctx.JSON(http.StatusUnprocessableEntity, resp)
+	}
+
+	reqEntity := entity.UserEntity{
+		Email: req.Email,
+	}
+
+	err = h.userService.ForgotPassword(c, &reqEntity)
+	if err != nil {
+		log.Errorf("[UserHandler-2] ForgotPassword: failed to process forgot password: %v", err)
+		if err.Error() == "404" {
+			resp.Message = "user not found"
+			resp.Data = nil
+			return ctx.JSON(http.StatusNotFound, resp)
+		}
+		resp.Message = err.Error()
+		resp.Data = nil
+		return ctx.JSON(http.StatusInternalServerError, resp)
+	}
+
+	resp.Message = "success"
+	resp.Data = nil
+	return ctx.JSON(http.StatusOK, resp)
 }

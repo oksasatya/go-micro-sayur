@@ -2,9 +2,10 @@ package message
 
 import (
 	"encoding/json"
+	"user-service/config"
+
 	"github.com/labstack/gommon/log"
 	"github.com/streadway/amqp"
-	"user-service/config"
 )
 
 func PublishMessage(email, message, notif_type string) error {

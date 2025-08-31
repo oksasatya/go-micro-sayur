@@ -2,9 +2,6 @@ package app
 
 import (
 	"context"
-	"github.com/go-playground/validator/v10/translations/en"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"os"
 	"os/signal"
@@ -15,6 +12,10 @@ import (
 	"user-service/internal/adapter/repository"
 	"user-service/internal/core/service"
 	"user-service/utils/validator"
+
+	"github.com/go-playground/validator/v10/translations/en"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func RunServer() {
@@ -25,8 +26,9 @@ func RunServer() {
 	}
 
 	userRepo := repository.NewUserRepository(db.DB)
+	tokenRepo := repository.NewVerificationTokenRepository(db.DB)
 	jwtService := service.NewJwtService(cfg)
-	userService := service.NewUserService(userRepo, cfg, jwtService)
+	userService := service.NewUserService(userRepo, cfg, jwtService, tokenRepo)
 
 	e := echo.New()
 	e.Use(middleware.CORS())

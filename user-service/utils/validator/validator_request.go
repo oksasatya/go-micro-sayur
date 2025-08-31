@@ -2,6 +2,7 @@ package validator
 
 import (
 	"errors"
+
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
@@ -14,8 +15,8 @@ type Validator struct {
 }
 
 func NewValidator() *Validator {
-	en := en.New()        // Create a new instance of the validator
-	uni := ut.New(en, en) // Create a universal translator with the English locale
+	enLang := en.New()            // Create a new instance of the validator
+	uni := ut.New(enLang, enLang) // Create a universal translator with the English locale
 	trans, found := uni.GetTranslator("en")
 	if !found {
 		log.Fatalf("[NewValidator-1] NewValidator: translator not found")

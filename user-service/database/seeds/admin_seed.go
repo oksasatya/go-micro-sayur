@@ -2,10 +2,11 @@ package seeds
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"log"
 	"user-service/internal/core/domain/model"
 	"user-service/utils/conv"
+
+	"gorm.io/gorm"
 )
 
 func SeedAdmin(db *gorm.DB) {

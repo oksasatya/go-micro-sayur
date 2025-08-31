@@ -3,11 +3,12 @@ package repository
 import (
 	"context"
 	"errors"
-	"github.com/labstack/gommon/log"
-	"gorm.io/gorm"
 	"time"
 	"user-service/internal/core/domain/entity"
 	"user-service/internal/core/domain/model"
+
+	"github.com/labstack/gommon/log"
+	"gorm.io/gorm"
 )
 
 type UserRepositoryInterface interface {
@@ -20,13 +21,19 @@ type UserRepository struct {
 }
 
 func (u *UserRepository) CreateUserAccount(ctx context.Context, req *entity.UserEntity) error {
+	var role model.Roles
+	if err := u.db.Where("name = ?", "Customer").First(&role).Error; err != nil {
+		log.Errorf("[UserRepository-1] CreateUserAccount: %v", err)
+		return err
+	}
 	modelUser := model.User{
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: req.Password,
+		Roles:    []model.Roles{role},
 	}
 	if err := u.db.Create(&modelUser).Error; err != nil {
-		log.Errorf("[UserRepository-1] CreateUserAccount: %v", err)
+		log.Errorf("[UserRepository-2] CreateUserAccount: %v", err)
 		return err
 	}
 
@@ -38,7 +45,7 @@ func (u *UserRepository) CreateUserAccount(ctx context.Context, req *entity.User
 	}
 
 	if err := u.db.Create(&modelverify).Error; err != nil {
-		log.Errorf("[UserRepository-2] CreateUserAccount: %v", err)
+		log.Errorf("[UserRepository-3] CreateUserAccount: %v", err)
 	}
 	return nil
 }
